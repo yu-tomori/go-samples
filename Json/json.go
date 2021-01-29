@@ -25,20 +25,42 @@ type Comment struct {
 	Author  string `json:"author"`
 }
 
-func main() {
-	jsonFile, err := os.Open("post.json")
+func decode(filename string) (post Post, err error) {
+	jsonFile, err := os.Open(filename)
 	if err != nil {
 		fmt.Println("Error opening JSON file: ", err)
 		return
 	}
 	defer jsonFile.Close()
-	jsonData, err := ioutil.ReadAll(jsonFile)
+
+	decoder := json.NewDecoder(jsonFile)
+	err = decoder.Decode(&post)
 	if err != nil {
-		fmt.Println("Error reading JSON data: ", err)
+		fmt.Println("Error decoding JSON: ", err)
+	}
+	return
+}
+
+func unmarshal(filename string) (post Post, err error) {
+	jsonFile, err := os.Open(filename)
+	if err != nil {
+		fmt.Println("Error opening JSON file:", err)
 		return
 	}
+	defer jsonFile.Close()
 
-	var post Post
+	jsonData, err := ioutil.ReadAll(jsonFile)
+	if err != nil {
+		fmt.Println("Error reading JSON data:", err)
+		return
+	}
 	json.Unmarshal(jsonData, &post)
-	fmt.Println(post)
+	return
+}
+
+func main() {
+	_, err := decode("post.json")
+	if err != nil {
+		fmt.Println("Error: ", err)
+	}
 }
